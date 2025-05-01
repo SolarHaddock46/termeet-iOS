@@ -11,8 +11,6 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
     private let items: [Item]
     private let content: (Item) -> Content
     private var axis: Axis.Set = .horizontal
-    private var willSelect: ((_ old: Item, _ new: Item) -> Void)?
-    private var didSelect: ((_ old: Item, _ new: Item) -> Void)?
     private var background: Background
     private var animationSelect: Animation?
 
