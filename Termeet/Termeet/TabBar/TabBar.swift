@@ -14,6 +14,7 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
     private var willSelect: ((_ old: Item, _ new: Item) -> Void)?
     private var didSelect: ((_ old: Item, _ new: Item) -> Void)?
     private var background: Background
+    private var animationSelect: Animation?
 
     init(
         selected: Binding<Item.ID>,
@@ -47,7 +48,9 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
     private var tabButtons: some View {
         ForEach(items, id: \.id) { item in
             Button {
-                selected = item.id
+                withAnimation(animationSelect) {
+                    selected = item.id
+                }
             } label: {
                 content(item)
                     .frame(maxWidth: .infinity)
@@ -55,6 +58,14 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
             }
             .buttonStyle(.plain)
         }
+    }
+}
+
+extension TabBar {
+    func onAnimationSelect(_ animation: () -> (Animation?)) -> Self {
+        var copy = self
+        copy.animationSelect = animation()
+        return copy
     }
 }
 
@@ -86,6 +97,9 @@ private struct PreviewTabItem: Identifiable {
         Color.gray
             .cornerRadius(10)
             .shadow(radius: 3)
+    }
+    .onAnimationSelect {
+        .default
     }
     .frame(height: 50)
     .padding()
