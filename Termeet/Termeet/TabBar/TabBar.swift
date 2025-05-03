@@ -153,6 +153,8 @@ extension TabBar {
     }
 }
 
+#if DEBUG
+
 private enum Tags: Int, Hashable {
     case none, home, search
 }
@@ -203,3 +205,5 @@ private struct PreviewTabItem: Identifiable {
     .frame(maxWidth: .infinity, maxHeight: .infinity)
     .edgesIgnoringSafeArea(.bottom)
 }
+
+#endif
