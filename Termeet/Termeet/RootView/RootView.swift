@@ -15,9 +15,17 @@ private enum Constants {
         .init(id: .notifications, nameImage: "person.fill"),
         .init(id: .profile, nameImage: "bell.fill")
     ]
-    
+
+    enum Size {
+        static let heightImageTabBar: CGFloat = 40
+        static let widthImageTabBar: CGFloat = 40
+        static let heightTabBar: CGFloat = 84
+    }
+
     enum Colors {
-        static let backgroundTabBar = Color.white
+        static let backgroundTabBar = Color(light: .init(hex: 0xFFFFFF), dark: .init(hex: 0xFFFFFF))
+        static let selectedTab = Color(light: .init(hex: 0x386DD4), dark: .init(hex: 0x386DD4))
+        static let unselectedTab = Color(light: .init(hex: 0x959595), dark: .init(hex: 0x959595))
     }
 }
 
@@ -42,11 +50,19 @@ struct RootView: View {
                 items: Constants.icons
             ) { item in
                 Image(systemName: item.nameImage)
-                    .foregroundStyle(selectedTab == item.id ? Color.blue : Color.black)
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(
+                        maxWidth: Constants.Size.heightImageTabBar,
+                        maxHeight: Constants.Size.widthImageTabBar
+                    )
+                    .foregroundStyle(
+                        selectedTab == item.id ? Constants.Colors.selectedTab : Constants.Colors.unselectedTab
+                    )
             } background: {
                 Constants.Colors.backgroundTabBar
             }
-            .frame(maxHeight: 84)
+            .frame(maxHeight: Constants.Size.heightTabBar)
             .edgesIgnoringSafeArea(.bottom)
         }
         .ignoresSafeArea(.all, edges: .bottom)
