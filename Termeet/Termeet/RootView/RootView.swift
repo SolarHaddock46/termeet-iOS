@@ -9,11 +9,31 @@ import SwiftUI
 
 private enum Constants {
     static let icons: [RootView.Icon] = [
-        .init(id: .meets, nameImage: "line.3.horizontal"),
-        .init(id: .teams, nameImage: "person.2.fill"),
-        .init(id: .createMeet, nameImage: "plus.app"),
-        .init(id: .notifications, nameImage: "person.fill"),
-        .init(id: .profile, nameImage: "bell.fill")
+        .init(
+            id: .meets,
+            normalImage: "meetsTabButton",
+            selectedImage: "meetsTabButtonSelected"
+        ),
+        .init(
+            id: .teams,
+            normalImage: "teamsTabButton",
+            selectedImage: "teamsTabButtonSelected"
+        ),
+        .init(
+            id: .createMeet,
+            normalImage: "createMeetTabButton",
+            selectedImage: "createMeetTabButtonSelected"
+        ),
+        .init(
+            id: .notifications,
+            normalImage: "notificationTabButton",
+            selectedImage: "notificationTabButtonSelected"
+        ),
+        .init(
+            id: .profile,
+            normalImage: "profileTabButton",
+            selectedImage: "profileTabButtonSelected"
+        )
     ]
 
     enum Size {
@@ -24,8 +44,6 @@ private enum Constants {
 
     enum Colors {
         static let backgroundTabBar = Color(light: .init(hex: 0xFFFFFF), dark: .init(hex: 0xFFFFFF))
-        static let selectedTab = Color(light: .init(hex: 0x386DD4), dark: .init(hex: 0x386DD4))
-        static let unselectedTab = Color(light: .init(hex: 0x959595), dark: .init(hex: 0x959595))
     }
 }
 
@@ -36,7 +54,8 @@ struct RootView: View {
 
     struct Icon: Identifiable {
         let id: Tab
-        let nameImage: String
+        let normalImage: String
+        let selectedImage: String
     }
 
     @State var selectedTab: Tab = .profile
@@ -49,15 +68,12 @@ struct RootView: View {
                 selected: $selectedTab,
                 items: Constants.icons
             ) { item in
-                Image(systemName: item.nameImage)
+                Image(selectedTab != item.id ? item.normalImage : item.selectedImage)
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(
                         maxWidth: Constants.Size.heightImageTabBar,
                         maxHeight: Constants.Size.widthImageTabBar
-                    )
-                    .foregroundStyle(
-                        selectedTab == item.id ? Constants.Colors.selectedTab : Constants.Colors.unselectedTab
                     )
             } background: {
                 Constants.Colors.backgroundTabBar

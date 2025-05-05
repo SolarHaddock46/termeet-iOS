@@ -12,8 +12,8 @@ extension Color {
      Initializes a `Color` that adapts to the current system color scheme (light or dark mode).
      
      - Parameters:
-     - light: The color to be used in light mode.
-     - dark: The color to be used in dark mode.
+         - light: The color to use in light mode.
+         - dark: The color to use in dark mode.
      
      This uses UIKit's dynamic color system under the hood via `UIColor`.
      

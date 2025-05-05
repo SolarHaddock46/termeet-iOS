@@ -86,11 +86,11 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
      Creates a new TabBar.
      
      - Parameters:
-     - selected: A binding to the selected item's ID.
-     - items: An array of items to be displayed.
-     - axis: The layout axis. Default is horizontal.
-     - content: A view builder that returns content for each item.
-     - background: A view builder for the background. Default is EmptyView.
+         - selected: A binding to the selected item's ID.
+         - items: An array of items to be displayed.
+         - axis: The layout axis. Default is horizontal.
+         - content: A view builder that returns content for each item.
+         - background: A view builder for the background. Default is EmptyView.
     */
     init(
         selected: Binding<Item.ID>,

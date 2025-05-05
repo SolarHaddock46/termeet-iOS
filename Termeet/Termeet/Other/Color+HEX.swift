@@ -7,6 +7,8 @@
 
 import SwiftUI
 
+private let sixDigitHexColorMax: UInt32 = 0xFFFFFF
+
 extension Color {
     /**
      Initializes a `Color` from a hexadecimal value.
@@ -24,7 +26,7 @@ extension Color {
     */
     init(hex: UInt32) {
         let red, green, blue, alpha: Double
-        if hex > 0xFFFFFF {
+        if hex > sixDigitHexColorMax {
             red = Double((hex >> 24) & 0xFF) / 255.0
             green = Double((hex >> 16) & 0xFF) / 255.0
             blue = Double((hex >> 8) & 0xFF) / 255.0
