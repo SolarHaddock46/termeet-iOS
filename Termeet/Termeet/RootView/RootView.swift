@@ -59,29 +59,39 @@ struct RootView: View {
     }
 
     @State var selectedTab: Tab = .profile
+    @StateObject private var router = Router()
 
     var body: some View {
-        VStack(spacing: 0) {
-            tabContent(selectedTab)
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-            TabBar(
-                selected: $selectedTab,
-                items: Constants.icons
-            ) { item in
-                Image(selectedTab != item.id ? item.normalImage : item.selectedImage)
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(
-                        maxWidth: Constants.Size.heightImageTabBar,
-                        maxHeight: Constants.Size.widthImageTabBar
-                    )
-            } background: {
-                Constants.Colors.backgroundTabBar
+        NavigationStack(path: $router.path) {
+            VStack(spacing: 0) {
+                tabContent(selectedTab)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                TabBar(
+                    selected: $selectedTab,
+                    items: Constants.icons
+                ) { item in
+                    Image(selectedTab != item.id ? item.normalImage : item.selectedImage)
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(
+                            maxWidth: Constants.Size.heightImageTabBar,
+                            maxHeight: Constants.Size.widthImageTabBar
+                        )
+                } background: {
+                    Constants.Colors.backgroundTabBar
+                }
+                .frame(maxHeight: Constants.Size.heightTabBar)
+                .edgesIgnoringSafeArea(.bottom)
             }
-            .frame(maxHeight: Constants.Size.heightTabBar)
-            .edgesIgnoringSafeArea(.bottom)
+            .ignoresSafeArea(.all, edges: .bottom)
+            .navigationDestination(for: Route.self) { route in
+                switch route {
+                case .detail: RootView() //Detail view
+                case .settings: RootView() // Settings view
+                }
+            }
         }
-        .ignoresSafeArea(.all, edges: .bottom)
+        .environmentObject(router)
     }
 }
 
