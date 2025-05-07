@@ -92,6 +92,10 @@ struct RootView: View {
             }
         }
         .environmentObject(router)
+        .sheet(item: $router.presentedSheet) { route in
+            RootView() //RootView(route: route)
+                       .onDisappear { router.dismiss() }
+               }
     }
 }
 
