@@ -16,11 +16,11 @@ enum Route: Hashable, Identifiable {
 final class Router: ObservableObject {
     @Published var path = NavigationPath()
     @Published var presentedSheet: Route?
-    private var lastAppendedRouter: Route?
+    private var lastAppendedRoute: Route?
 
     func navigate(to route: Route) {
-        if lastAppendedRouter != route {
-            lastAppendedRouter = route
+        if lastAppendedRoute != route {
+            lastAppendedRoute = route
             path.append(route)
         }
     }
