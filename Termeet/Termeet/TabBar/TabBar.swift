@@ -6,6 +6,16 @@
 //
 import SwiftUI
 
+private struct LazyView<Content: View>: View {
+    let build: () -> Content
+    init(@ViewBuilder _ build: @escaping () -> Content) {
+        self.build = build
+    }
+    var body: Content {
+        build()
+    }
+}
+
 /**
  A customizable and reusable tab bar component that supports full visual customization,
  animations, and flexible layout (horizontal or vertical).
@@ -14,65 +24,6 @@ import SwiftUI
     - Content: The type of content view shown for each tab item.
     - Background: The type of background view behind the tab bar.
     - Item: The model used for each tab, must conform to Identifiable.
-
- This component allows:
- - Custom content for each tab.
- - Custom background.
- - Optional animation for selection changes.
- - Horizontal or vertical layout.
- ## Example Usage
- ```swift
- private enum Tags: Int, Hashable {
-     case none, home, search
- }
-
- private struct PreviewTabItem: Identifiable {
-     let id: Tags
- }
-
- @ViewBuilder private func content(_ tag: Tags) -> some View {
-     switch tag {
-     case .none:
-         Text("CHOOSE!!!")
-     case .home:
-         Text("HOME!!!")
-     case .search:
-         Text("SEARCH!!!")
-     }
- }
-
- #Preview {
-     @Previewable @State var selected: Tags = .none
-     ZStack(alignment: .bottom) {
-         content(selected)
-             .frame(maxWidth: .infinity, maxHeight: .infinity)
-             .padding(.bottom, 60)
-         TabBar(
-             selected: $selected,
-             items: [
-                 PreviewTabItem(id: .home),
-                 PreviewTabItem(id: .search)
-             ]
-         ) { item in
-             ZStack {
-                 Rectangle()
-                     .foregroundStyle(selected == item.id ? .brown : .clear)
-                     .cornerRadius(10)
-                 Text("Tab \(item.id)")
-                     .foregroundStyle(selected == item.id ? .blue : .black)
-             }
-         } background: {
-             Color.gray
-                 .cornerRadius(10)
-                 .shadow(radius: 3)
-         }
-         .onAnimationSelect { .default }
-         .frame(height: 80)
-     }
-     .frame(maxWidth: .infinity, maxHeight: .infinity)
-     .edgesIgnoringSafeArea(.bottom)
- }
- ```
 */
 struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
     @Binding var selected: Item.ID
@@ -99,6 +50,7 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
         @ViewBuilder content: @escaping (Item) -> Content,
         @ViewBuilder background: @escaping () -> Background = { EmptyView() }
     ) {
+        precondition(!items.isEmpty, "TabBar must have at least one item")
         self._selected = selected
         self.items = items
         self.content = content
@@ -128,11 +80,14 @@ struct TabBar<Content: View, Background: View, Item: Identifiable>: View {
                     selected = item.id
                 }
             } label: {
-                content(item)
-                    .frame(maxWidth: .infinity)
-                    .contentShape(Rectangle())
+                LazyView {
+                    content(item)
+                        .frame(maxWidth: .infinity)
+                        .contentShape(Rectangle())
+                }
             }
             .buttonStyle(.plain)
+            .id(item.id)
         }
     }
 }
@@ -152,58 +107,3 @@ extension TabBar {
         return copy
     }
 }
-
-#if DEBUG
-
-private enum Tags: Int, Hashable {
-    case none, home, search
-}
-
-private struct PreviewTabItem: Identifiable {
-    let id: Tags
-}
-
-@ViewBuilder private func content(_ tag: Tags) -> some View {
-    switch tag {
-    case .none:
-        Text("CHOOSE!!!")
-    case .home:
-        Text("HOME!!!")
-    case .search:
-        Text("SEARCH!!!")
-    }
-}
-
-#Preview {
-    @Previewable @State var selected: Tags = .none
-    ZStack(alignment: .bottom) {
-        content(selected)
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .padding(.bottom, 60)
-        TabBar(
-            selected: $selected,
-            items: [
-                PreviewTabItem(id: .home),
-                PreviewTabItem(id: .search)
-            ]
-        ) { item in
-            ZStack {
-                Rectangle()
-                    .foregroundStyle(selected == item.id ? .brown : .clear)
-                    .cornerRadius(10)
-                Text("Tab \(item.id)")
-                    .foregroundStyle(selected == item.id ? .blue : .black)
-            }
-        } background: {
-            Color.gray
-                .cornerRadius(10)
-                .shadow(radius: 3)
-        }
-        .onAnimationSelect { .default }
-        .frame(height: 80)
-    }
-    .frame(maxWidth: .infinity, maxHeight: .infinity)
-    .edgesIgnoringSafeArea(.bottom)
-}
-
-#endif

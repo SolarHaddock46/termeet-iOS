@@ -1,10 +1,10 @@
 import SwiftUI
 
 enum Route: Hashable, Identifiable {
-    
+
     case detail
     case settings
-    
+
     var id: String {
         switch self {
         case .detail: return "detail"
@@ -16,9 +16,13 @@ enum Route: Hashable, Identifiable {
 final class Router: ObservableObject {
     @Published var path = NavigationPath()
     @Published var presentedSheet: Route?
+    private var lastAppendedRouter: Route?
 
     func navigate(to route: Route) {
-        path.append(route)
+        if lastAppendedRouter != route {
+            lastAppendedRouter = route
+            path.append(route)
+        }
     }
 
     func present(route: Route) {
@@ -30,6 +34,6 @@ final class Router: ObservableObject {
     }
 
     func popToRoot() {
-        path.removeLast(path.count)
+        path = NavigationPath()
     }
 }

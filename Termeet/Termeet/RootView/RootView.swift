@@ -86,16 +86,16 @@ struct RootView: View {
             .ignoresSafeArea(.all, edges: .bottom)
             .navigationDestination(for: Route.self) { route in
                 switch route {
-                case .detail: RootView() //Detail view
+                case .detail: RootView() // Detail view
                 case .settings: RootView() // Settings view
                 }
             }
         }
         .environmentObject(router)
-        .sheet(item: $router.presentedSheet) { route in
-            RootView() //RootView(route: route)
-                       .onDisappear { router.dismiss() }
-               }
+        .sheet(item: $router.presentedSheet) { _ in
+            RootView() // RootView(route: route)
+                .onDisappear { router.dismiss() }
+        }
     }
 }
 

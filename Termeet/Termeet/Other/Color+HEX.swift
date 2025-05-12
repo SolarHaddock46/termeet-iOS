@@ -11,18 +11,9 @@ private let sixDigitHexColorMax: UInt32 = 0xFFFFFF
 
 extension Color {
     /**
-     Initializes a `Color` from a hexadecimal value.
+     An initializer that accepts a hex color code.
      
-     - If the `hex` value contains **8 digits** (e.g. `0xRRGGBBAA`), it extracts red, green, blue, and alpha components.
-     - If the `hex` value contains **6 digits** (e.g. `0xRRGGBB`), it assumes full opacity (`alpha = 1.0`).
-     
-     ### Examples:
-     ```swift
-     Color(hex: 0xFF0000)       // Red
-     Color(hex: 0x00FF0080)     // Semi-transparent green
-     ```
-     
-     - Parameter hex: A 6-digit or 8-digit hexadecimal integer representing the color.
+     - Parameter hex: A 6-digit (in this case, alpha = 1) or 8-digit hexadecimal integer representing the color.
     */
     init(hex: UInt32) {
         let red, green, blue, alpha: Double
