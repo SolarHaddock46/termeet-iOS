@@ -110,11 +110,3 @@ private extension RootView {
         }
     }
 }
-
-#if DEBUG
-
-#Preview {
-    RootView()
-}
-
-#endif

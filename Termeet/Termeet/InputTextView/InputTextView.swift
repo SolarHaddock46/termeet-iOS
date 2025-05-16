@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import Combine
 
 private enum Constants {
     enum Icons {
@@ -37,34 +36,36 @@ private enum Constants {
     }
 }
 
+struct InputTextConfiguration {
+    var placeholder: String?
+    var headerText: String?
+    var footerText: String?
+    var auxiliaryButtonText: String?
+
+    var isSecured: Bool = false
+    var isErrored: Bool = false
+
+    var headerFont: Font = Constants.Fonts.header
+    var headerColor: Color = Constants.Colors.header
+    var footerFont: Font = Constants.Fonts.footer
+    var footerColor: Color = Constants.Colors.footer
+    var errorColor: Color = Constants.Colors.error
+    var boardColor: Color = Constants.Colors.border
+
+    var onBeginEditing: (() -> Void)?
+    var onEndEditing: (() -> Void)?
+    var onTextChange: ((String) -> Void)?
+    var auxiliaryButtonAction: (() -> Void)?
+}
+
 struct InputTextView: View {
     @Binding var text: String
     @State private var isShowingText: Bool = false
+    private var configuration: InputTextConfiguration
 
-    private var placeholder: String?
-    private var headerText: String?
-    private var footerText: String?
-    private var auxiliaryButtonText: String?
-
-    private var isSecured: Bool = false
-    private var isErrored: Bool = false
-
-    private var headerFont: Font = Constants.Fonts.header
-    private var headerColor: Color = Constants.Colors.header
-    private var footerFont: Font = Constants.Fonts.footer
-    private var footerColor: Color = Constants.Colors.footer
-    private var errorColor: Color = Constants.Colors.error
-    private var boardColor: Color = Constants.Colors.border
-
-    private var onBeginEditing: (() -> Void)?
-    private var onEndEditing: (() -> Void)?
-    private var onTextChange: ((String) -> Void)?
-    private var auxiliaryButtonAction: (() -> Void)?
-
-    init(text: Binding<String>, headerText: String? = nil, footerText: String? = nil) {
+    init(text: Binding<String>, configuration: InputTextConfiguration = InputTextConfiguration()) {
         self._text = text
-        self.headerText = headerText
-        self.footerText = footerText
+        self.configuration = configuration
     }
 
     var body: some View {
@@ -80,10 +81,10 @@ struct InputTextView: View {
 private extension InputTextView {
     var headerView: some View {
         HStack {
-            if let headerText {
+            if let headerText = configuration.headerText {
                 Text(headerText)
-                    .font(headerFont)
-                    .foregroundColor(headerColor)
+                    .font(configuration.headerFont)
+                    .foregroundColor(configuration.headerColor)
             }
             Spacer()
         }
@@ -97,16 +98,23 @@ private extension InputTextView {
         .padding(Constants.Layouts.textFieldPadding)
         .background(
             RoundedRectangle(cornerRadius: Constants.Layouts.cornerRadius)
-                .stroke(isErrored ? errorColor : boardColor, lineWidth: 1)
+                .stroke(
+                    configuration.isErrored ?
+                    configuration.errorColor :
+                    (text.isEmpty ? configuration.footerColor : configuration.boardColor),
+                    lineWidth: 1
+                )
         )
     }
 
     var footerView: some View {
         HStack {
-            if let footerText {
+            if let footerText = configuration.footerText {
                 Text(footerText)
-                    .font(footerFont)
-                    .foregroundColor(isErrored ? errorColor : footerColor)
+                    .font(configuration.footerFont)
+                    .foregroundColor(configuration.isErrored ?
+                                   configuration.errorColor :
+                                   configuration.footerColor)
             }
             Spacer()
             auxiliaryButton
@@ -115,31 +123,33 @@ private extension InputTextView {
 
     var textField: some View {
         Group {
-            if isSecured && !isShowingText {
+            if configuration.isSecured && !isShowingText {
                 SecureField(
-                    placeholder ?? "",
+                    configuration.placeholder ?? "",
                     text: $text,
-                    onCommit: { onEndEditing?() }
+                    onCommit: { configuration.onEndEditing?() }
                 )
             } else {
                 TextField(
-                    placeholder ?? "",
+                    configuration.placeholder ?? "",
                     text: $text,
                     onEditingChanged: { isEditing in
-                        isEditing ? onBeginEditing?() : onEndEditing?()
+                        isEditing ?
+                        configuration.onBeginEditing?() :
+                        configuration.onEndEditing?()
                     }
                 )
             }
         }
         .font(Constants.Fonts.textField)
         .onChange(of: text) { newValue in
-            onTextChange?(newValue)
+            configuration.onTextChange?(newValue)
         }
     }
 
     var secureToggleButton: some View {
         Group {
-            if isSecured {
+            if configuration.isSecured {
                 Image(isShowingText ? Constants.Icons.hideTextButton : Constants.Icons.showTextButton)
                     .resizable()
                     .frame(
@@ -155,8 +165,8 @@ private extension InputTextView {
 
     var auxiliaryButton: some View {
         Group {
-            if let auxiliaryButtonText {
-                Button(action: auxiliaryButtonAction ?? {}) {
+            if let auxiliaryButtonText = configuration.auxiliaryButtonText {
+                Button(action: configuration.auxiliaryButtonAction ?? {}) {
                     Text(auxiliaryButtonText)
                         .font(Constants.Fonts.auxiliaryButton)
                 }
@@ -167,102 +177,79 @@ private extension InputTextView {
 
 // MARK: - Modifiers
 extension InputTextView {
+    func setConfiguration(_ value: InputTextConfiguration) -> Self {
+        var view = self
+        view.configuration = value
+        return view
+    }
+
+    func updateConfiguration(_ update: (inout InputTextConfiguration) -> Void) -> Self {
+        var view = self
+        update(&view.configuration)
+        return view
+    }
+
     func setPlaceholder(_ value: String) -> Self {
-        var view = self
-        view.placeholder = value
-        return view
+        updateConfiguration { $0.placeholder = value }
     }
 
-    func setHeaderText(_ value: String?) -> Self {
-        var view = self
-        view.headerText = value
-        return view
+    func setHeader(text: String? = nil, font: Font? = nil, color: Color? = nil) -> Self {
+        updateConfiguration {
+            if let text { $0.headerText = text }
+            if let font { $0.headerFont = font }
+            if let color { $0.headerColor = color }
+        }
     }
 
-    func setFooterText(_ value: String?) -> Self {
-        var view = self
-        view.footerText = value
-        return view
-    }
-
-    func setHeaderFont(_ value: Font) -> Self {
-        var view = self
-        view.headerFont = value
-        return view
-    }
-
-    func setHeaderColor(_ value: Color) -> Self {
-        var view = self
-        view.headerColor = value
-        return view
-    }
-
-    func setFooterFont(_ value: Font) -> Self {
-        var view = self
-        view.footerFont = value
-        return view
-    }
-
-    func setFooterColor(_ value: Color) -> Self {
-        var view = self
-        view.footerColor = value
-        return view
+    func setFooter(text: String? = nil, font: Font? = nil, color: Color? = nil) -> Self {
+        updateConfiguration {
+            if let text { $0.footerText = text }
+            if let font { $0.footerFont = font }
+            if let color { $0.footerColor = color }
+        }
     }
 
     func setErrorState(_ value: Bool) -> Self {
-        var view = self
-        view.isErrored = value
-        return view
+        updateConfiguration { $0.isErrored = value }
     }
 
     func setSecureInput(_ value: Bool) -> Self {
-        var view = self
-        view.isSecured = value
-        return view
+        updateConfiguration { $0.isSecured = value }
     }
 
     func setBoardColor(_ value: Color) -> Self {
-        var view = self
-        view.boardColor = value
-        return view
+        updateConfiguration { $0.boardColor = value }
     }
 
     func setAuxiliaryButton(text: String, action: @escaping () -> Void) -> Self {
-        var view = self
-        view.auxiliaryButtonText = text
-        view.auxiliaryButtonAction = action
-        return view
+        updateConfiguration {
+            $0.auxiliaryButtonText = text
+            $0.auxiliaryButtonAction = action
+        }
     }
 
     func setOnBeginEditing(_ action: @escaping () -> Void) -> Self {
-        var view = self
-        view.onBeginEditing = action
-        return view
+        updateConfiguration { $0.onBeginEditing = action }
     }
 
     func setOnEndEditing(_ action: @escaping () -> Void) -> Self {
-        var view = self
-        view.onEndEditing = action
-        return view
+        updateConfiguration { $0.onEndEditing = action }
     }
 
     func setOnTextChange(_ action: @escaping (String) -> Void) -> Self {
-        var view = self
-        view.onTextChange = action
-        return view
+        updateConfiguration { $0.onTextChange = action }
     }
 }
 
-struct InputTextViewPreview: PreviewProvider {
-    @State static var text: String = ""
+struct InputTextView_Previews: PreviewProvider {
     static var previews: some View {
-        InputTextView(text: $text)
-            .setHeaderText("Test")
-            .setFooterText("Text")
-            .setPlaceholder("Test")
-            .setSecureInput(false)
-            .setAuxiliaryButton(text: "Password", action: {})
-            .setErrorState(true)
-            .padding()
+        InputTextView(text: .constant(""))
+            .setHeader(text: "Пароль")
+            .setFooter(text: "Минимум 8 символов")
+            .setPlaceholder("Введите пароль")
+            .setSecureInput(true)
+            .setAuxiliaryButton(text: "Забыли пароль?") {
+                print("Кнопка нажата")
+            }
     }
 }
