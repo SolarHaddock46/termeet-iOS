@@ -56,6 +56,11 @@ struct InputTextConfiguration {
     var onEndEditing: (() -> Void)?
     var onTextChange: ((String) -> Void)?
     var auxiliaryButtonAction: (() -> Void)?
+
+    mutating func update(_ changes: (inout Self) -> Void) {
+        changes(&self)
+    }
+
 }
 
 struct InputTextView: View {
@@ -185,7 +190,7 @@ extension InputTextView {
 
     func updateConfiguration(_ update: (inout InputTextConfiguration) -> Void) -> Self {
         var view = self
-        update(&view.configuration)
+        view.configuration.update(update)
         return view
     }
 
