@@ -47,6 +47,35 @@ final class PasswordRecoveryViewModel: ObservableObject {
         initContainers()
     }
 
+    private func checkEmail(_ email: String) {
+        if email == "123" {
+            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
+                $0.isErrored = true
+                $0.footerText = "Почта некорректна"
+            }
+        } else {
+            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
+                $0.isErrored = false
+                $0.footerText = "На эту почту будет отправлено письмо с восстановлением"
+            }
+        }
+    }
+}
+
+extension PasswordRecoveryViewModel {
+    enum StateView: Hashable {
+        case inputEmail, sendingLetter, inputNewPassword
+    }
+}
+
+// MARK: Containers
+
+extension PasswordRecoveryViewModel {
+    struct Container {
+        var text: String = ""
+        var configuration: InputTextConfiguration
+    }
+
     func binding(for id: UUID) -> Binding<String> {
         Binding(
             get: { self.containers[id]?.text ?? "" },
@@ -95,35 +124,12 @@ final class PasswordRecoveryViewModel: ObservableObject {
         containers[ContainerUUIDs.InputNewPassword.password] = .init(configuration: .init())
         containers[ContainerUUIDs.InputNewPassword.repeatPassword] = .init(configuration: .init())
     }
-
-    private func checkEmail(_ email: String) {
-        if email == "123" {
-            print("error email")
-            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
-                $0.isErrored = true
-                $0.footerText = "Почта некорректна"
-            }
-        } else {
-            print("no error email")
-            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
-                $0.isErrored = false
-                $0.footerText = "На эту почту будет отправлено письмо с восстановлением"
-            }
-        }
-    }
 }
 
-extension PasswordRecoveryViewModel {
-    enum StateView: Hashable {
-        case inputEmail, sendingLetter, inputNewPassword
-    }
-}
+// MARK: ConformButtonConfiguration
 
-extension PasswordRecoveryViewModel {
-    struct Container {
-        var text: String = ""
-        var configuration: InputTextConfiguration
-    }
+extension PasswordRecoveryView {
+
 }
 
 extension PasswordRecoveryViewModel {

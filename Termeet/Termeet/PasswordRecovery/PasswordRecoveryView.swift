@@ -29,6 +29,10 @@ struct PasswordRecoveryView: View {
                 InputTextView(text: viewModel.binding(for: id), configuration: container.configuration)
             }
             Spacer()
+
+            Button("Вернуть ко входу") {
+                router.popToRoot()
+            }
         }.navigationDestination(for: Route.self) { route in
             let destinationView: PasswordRecoveryView? = {
                 switch route {

@@ -194,21 +194,21 @@ extension InputTextView {
         return view
     }
 
-    func setPlaceholder(_ value: String) -> Self {
+    func setPlaceholder(_ value: String?) -> Self {
         updateConfiguration { $0.placeholder = value }
     }
 
-    func setHeader(text: String? = nil, font: Font? = nil, color: Color? = nil) -> Self {
+    func setHeader(text: String?, font: Font? = nil, color: Color? = nil) -> Self {
         updateConfiguration {
-            if let text { $0.headerText = text }
+            $0.headerText = text
             if let font { $0.headerFont = font }
             if let color { $0.headerColor = color }
         }
     }
 
-    func setFooter(text: String? = nil, font: Font? = nil, color: Color? = nil) -> Self {
+    func setFooter(text: String?, font: Font? = nil, color: Color? = nil) -> Self {
         updateConfiguration {
-            if let text { $0.footerText = text }
+            $0.footerText = text
             if let font { $0.footerFont = font }
             if let color { $0.footerColor = color }
         }
@@ -226,22 +226,22 @@ extension InputTextView {
         updateConfiguration { $0.boardColor = value }
     }
 
-    func setAuxiliaryButton(text: String, action: @escaping () -> Void) -> Self {
+    func setAuxiliaryButton(text: String? = nil, action: (() -> Void)? = nil) -> Self {
         updateConfiguration {
             $0.auxiliaryButtonText = text
             $0.auxiliaryButtonAction = action
         }
     }
 
-    func setOnBeginEditing(_ action: @escaping () -> Void) -> Self {
+    func setOnBeginEditing(_ action: (() -> Void)? = nil) -> Self {
         updateConfiguration { $0.onBeginEditing = action }
     }
 
-    func setOnEndEditing(_ action: @escaping () -> Void) -> Self {
+    func setOnEndEditing(_ action: (() -> Void)? = nil ) -> Self {
         updateConfiguration { $0.onEndEditing = action }
     }
 
-    func setOnTextChange(_ action: @escaping (String) -> Void) -> Self {
+    func setOnTextChange(_ action: ((String) -> Void)? = nil) -> Self {
         updateConfiguration { $0.onTextChange = action }
     }
 }
