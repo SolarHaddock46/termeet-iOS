@@ -41,10 +41,12 @@ final class PasswordRecoveryViewModel: ObservableObject {
         category: String(describing: PasswordRecoveryViewModel.self)
     )
     private let networkingService = MockNetworkingService()
-    @Published private var containers = [UUID: Container]()
+    @Published private(set) var containers = [UUID: Container]()
+    @Published private(set) var confirmButtonConfiguration = ConfirmButtonConfiguration(title: "Test")
 
     init() {
         initContainers()
+        initConfirmButton()
     }
 
     private func checkEmail(_ email: String) {
@@ -126,10 +128,15 @@ extension PasswordRecoveryViewModel {
     }
 }
 
-// MARK: ConformButtonConfiguration
+extension PasswordRecoveryViewModel {
+    private func initConfirmButton() {
+        confirmButtonConfiguration.update {
+            $0.title = "Отправить письмо на почту"
+            $0.isEnabled = false
+            $0.footerTextButton = "Вернуться ко входу"
 
-extension PasswordRecoveryView {
-
+        }
+    }
 }
 
 extension PasswordRecoveryViewModel {

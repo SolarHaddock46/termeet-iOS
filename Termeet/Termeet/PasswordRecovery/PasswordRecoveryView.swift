@@ -8,7 +8,21 @@
 import SwiftUI
 
 private enum Constants {
+    enum Fonts {
 
+    }
+
+    enum Sizes {
+
+    }
+
+    enum Layouts {
+
+    }
+
+    enum Texts {
+
+    }
 }
 
 struct PasswordRecoveryView: View {
@@ -25,15 +39,20 @@ struct PasswordRecoveryView: View {
 
     var inputTextViews: some View {
         VStack(spacing: 24) {
+            HStack {
+                Text("Восстановление пароля")
+                    .font(.system(size: 30, weight: .bold))
+                Spacer()
+            }
+
             ForEach(viewModel.getContainers(), id: \.id) { id, container in
                 InputTextView(text: viewModel.binding(for: id), configuration: container.configuration)
             }
             Spacer()
-
-            Button("Вернуть ко входу") {
-                router.popToRoot()
-            }
-        }.navigationDestination(for: Route.self) { route in
+            ConfirmButton(configuration: viewModel.confirmButtonConfiguration)
+        }.padding(.leading, 16)
+            .padding(.trailing, 16)
+        .navigationDestination(for: Route.self) { route in
             let destinationView: PasswordRecoveryView? = {
                 switch route {
                 case .passwordRecoverySendingLetter:
@@ -76,8 +95,6 @@ struct PasswordRecoveryView_Previews: PreviewProvider {
         var body: some View {
             NavigationStack(path: $router.path) {
                 PasswordRecoveryView()
-                    .navigationTitle("Восстановление пароля")
-                    .navigationBarTitleDisplayMode(.automatic)
             }.environmentObject(router)
         }
     }
