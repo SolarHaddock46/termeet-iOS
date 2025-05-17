@@ -88,6 +88,8 @@ struct RootView: View {
                 switch route {
                 case .detail: RootView() // Detail view
                 case .settings: RootView() // Settings view
+                default:
+                    EmptyView()
                 }
             }
         }

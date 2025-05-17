@@ -30,7 +30,16 @@ private enum ContainerUUIDs {
 final class PasswordRecoveryViewModel: ObservableObject {
     @Published private(set) var stateView: StateView = .inputEmail
 
-    private let logger = Logger(subsystem: Bundle.main.bundleIdentifier ?? "Unknown", category: String(describing: PasswordRecoveryViewModel.self))
+    convenience init(copying other: PasswordRecoveryViewModel, state: StateView) {
+        self.init()
+        self.containers = other.containers
+        self.stateView = state
+      }
+
+    private let logger = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Unknown",
+        category: String(describing: PasswordRecoveryViewModel.self)
+    )
     private let networkingService = MockNetworkingService()
     @Published private var containers = [UUID: Container]()
 
@@ -102,12 +111,10 @@ final class PasswordRecoveryViewModel: ObservableObject {
             }
         }
     }
-
-
 }
 
 extension PasswordRecoveryViewModel {
-    enum StateView {
+    enum StateView: Hashable {
         case inputEmail, sendingLetter, inputNewPassword
     }
 }
@@ -119,3 +126,32 @@ extension PasswordRecoveryViewModel {
     }
 }
 
+extension PasswordRecoveryViewModel {
+    func setState(_ state: StateView) {
+        self.stateView = state
+    }
+}
+
+extension PasswordRecoveryViewModel {
+    func nextState() {
+        switch stateView {
+        case .inputEmail:
+            stateView = .sendingLetter
+        case .sendingLetter:
+            stateView = .inputNewPassword
+        case .inputNewPassword:
+            break
+        }
+    }
+
+    func previousState() {
+        switch stateView {
+        case .inputNewPassword:
+            stateView = .sendingLetter
+        case .sendingLetter:
+            stateView = .inputEmail
+        case .inputEmail:
+            break
+        }
+    }
+}
