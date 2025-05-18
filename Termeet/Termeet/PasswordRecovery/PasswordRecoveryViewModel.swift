@@ -8,6 +8,29 @@
 import SwiftUI
 import OSLog
 
+private enum Constants {
+    enum Texts {
+        static let emailPlaceholder = "Введите почту"
+        static let emailHeader = "Почта"
+        static let emailFooter = "На эту почту будет отправлено письмо с восстановлением"
+        static let invalidEmailFooter = "Почта некорректна"
+
+        static let passwordPlaceholder = "Введите пароль"
+        static let passwordHeader = "Новый пароль"
+        static let passwordFooter = "Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв"
+        static let repeatPasswordHeader = "Пароль повторно"
+        static let mismatchedPasswords = "Пароли не совпадают"
+        static let incorrectPasswordFooter = "Некорректный пароль. Пароль должен содержать не менее 8 символов" +
+        "и состоять из цифр и латинских букв"
+
+        static let confirmSendEmail = "Отправить письмо на почту"
+        static let confirmResend = "Отправить повторно"
+        static let confirmRestore = "Восстановить"
+        static let returnToLogin = "Вернуться ко входу"
+        static let resendAvailableIn = "Вы можете запросить повторно через"
+    }
+}
+
 private class MockNetworkingService {
     func isCorrectEmail(_ email: String) -> Bool {
         email == "test@test.com"
@@ -109,22 +132,22 @@ extension PasswordRecoveryViewModel {
         case .inputEmail:
             containers[ContainerUUIDs.InputEmail.email] = .init(
                 configuration: .init(
-                    placeholder: "Введите почту",
-                    headerText: "Почта",
-                    footerText: "На эту почту будет отправлено письмо с восстановлением",
+                    placeholder: Constants.Texts.emailPlaceholder,
+                    headerText: Constants.Texts.emailHeader,
+                    footerText: Constants.Texts.emailFooter,
                     isSecured: true,
                     onTextChange: {
                         self.checkEmail($0)
                         self.checkFillForms()
-                    },
+                    }
                 )
             )
         case .inputNewPassword:
             containers[ContainerUUIDs.InputNewPassword.password] = .init(
                 configuration: .init(
-                    placeholder: "Введите пароль",
-                    headerText: "Новый пароль",
-                    footerText: "Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв",
+                    placeholder: Constants.Texts.passwordPlaceholder,
+                    headerText: Constants.Texts.passwordHeader,
+                    footerText: Constants.Texts.passwordFooter,
                     isSecured: true,
                     onEndEditing: { self.checkPassword() },
                     onTextChange: { _ in
@@ -132,10 +155,11 @@ extension PasswordRecoveryViewModel {
                     }
                 )
             )
+
             containers[ContainerUUIDs.InputNewPassword.repeatPassword] = .init(
                 configuration: .init(
-                    placeholder: "Введите пароль",
-                    headerText: "Пароль повторно",
+                    placeholder: Constants.Texts.passwordPlaceholder,
+                    headerText: Constants.Texts.repeatPasswordHeader,
                     isSecured: true,
                     onEndEditing: { self.checkPassword() },
                     onTextChange: { _ in
@@ -154,25 +178,25 @@ extension PasswordRecoveryViewModel {
         switch stateView {
         case .inputEmail:
             confirmButtonConfiguration.update {
-                $0.title = "Отправить письмо на почту"
+                $0.title = Constants.Texts.confirmSendEmail
                 $0.isEnabled = false
-                $0.footerTextButton = "Вернуться ко входу"
+                $0.footerTextButton = Constants.Texts.returnToLogin
                 $0.action = { self.router?.path.append(Route.passwordRecoverySendingLetter) }
                 $0.footerTextActionButton = { self.router?.popToRoot() }
             }
         case .sendingLetter:
             confirmButtonConfiguration.update {
-                $0.title = "Отправить повторно"
+                $0.title = Constants.Texts.confirmResend
                 $0.isEnabled = false
-                $0.footerTextButton = "Вернуться ко входу"
+                $0.footerTextButton = Constants.Texts.returnToLogin
                 $0.action = { self.router?.path.append(Route.passwordRecoveryInputNewPassword) }
                 $0.footerTextActionButton = { self.router?.popToRoot() }
             }
         case .inputNewPassword:
             confirmButtonConfiguration.update {
-                $0.title = "Восстановить"
+                $0.title = Constants.Texts.confirmRestore
                 $0.isEnabled = false
-                $0.footerTextButton = "Вернуться ко входу"
+                $0.footerTextButton = Constants.Texts.returnToLogin
                 $0.footerTextActionButton = { self.router?.popToRoot() }
             }
         }
@@ -184,12 +208,12 @@ private extension PasswordRecoveryViewModel {
         if email == "123" {
             containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
                 $0.isErrored = true
-                $0.footerText = "Почта некорректна"
+                $0.footerText = Constants.Texts.invalidEmailFooter
             }
         } else {
             containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
                 $0.isErrored = false
-                $0.footerText = "На эту почту будет отправлено письмо с восстановлением"
+                $0.footerText = Constants.Texts.emailFooter
             }
         }
     }
@@ -215,21 +239,20 @@ private extension PasswordRecoveryViewModel {
         if containerPassword.text == "123" {
             containerPassword.configuration.update {
                 $0.isErrored = true
-                $0.footerText = "Некорректный пароль. Пароль должен содержать не" +
-                " менее 8 символов и состоять из цифр и латинских букв"
+                $0.footerText = Constants.Texts.incorrectPasswordFooter
             }
             containers[ContainerUUIDs.InputNewPassword.password] = containerPassword
             return
         } else {
             containerPassword.configuration.update {
                 $0.isErrored = false
-                $0.footerText = "Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв"
+                $0.footerText = Constants.Texts.passwordFooter
             }
         }
         if containerPassword.text != containerRepeatPassword.text {
             containerRepeatPassword.configuration.update {
                 $0.isErrored = true
-                $0.footerText = "Пароли не совпадают"
+                $0.footerText = Constants.Texts.mismatchedPasswords
             }
         } else {
             containerRepeatPassword.configuration.update {
@@ -258,7 +281,7 @@ extension PasswordRecoveryViewModel {
         })
         var counter = 0
         self.confirmButtonConfiguration.update {
-            $0.headerText = "Вы можете запросить повторно через 3:00"
+            $0.headerText = "\(Constants.Texts.resendAvailableIn) 3:00"
             $0.isEnabled = false
         }
 
@@ -279,7 +302,7 @@ extension PasswordRecoveryViewModel {
                 let seconds = time % 60
                 let secondsString = String(format: "%02d", seconds)
                 self.confirmButtonConfiguration.update {
-                    $0.headerText = "Вы можете запросить повторно через \(minutes):\(secondsString)"
+                    $0.headerText = "\(Constants.Texts.resendAvailableIn) \(minutes):\(secondsString)"
                     $0.isEnabled = false
                 }
                 counter += 1

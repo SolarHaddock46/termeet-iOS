@@ -9,19 +9,26 @@ import SwiftUI
 
 private enum Constants {
     enum Fonts {
-
+        static let recoveryTitle = Font.system(size: 30, weight: .bold)
     }
 
     enum Sizes {
-
+        static let bottomPadding: CGFloat = 48
+        static let spacingBetweenViews: CGFloat = 20
+        static let horizontalPadding: CGFloat = 16
     }
 
     enum Layouts {
-        
+        static let inputViewsSpacing: CGFloat = 24
     }
 
     enum Texts {
-
+        static let recoveryTitle = "Восстановление пароля"
+        static let emailSentMessage = """
+            На адрес superpochta@mail.ru отправлено письмо с \
+            ссылкой для восстановления пароля. Пожалуйста, \
+            проверьте папку спам.
+            """
     }
 }
 
@@ -41,30 +48,32 @@ struct PasswordRecoveryView: View {
         Group {
             VStack {
                 HStack {
-                    Text("Восстановление пароля")
-                        .font(.system(size: 30, weight: .bold))
+                    Text(Constants.Texts.recoveryTitle)
+                        .font(Constants.Fonts.recoveryTitle)
                     Spacer()
-                }.padding(.bottom, viewModel.stateView == .sendingLetter ? 0 : 48)
-                VStack(spacing: 20) {
+                }
+                .padding(.bottom, viewModel.stateView == .sendingLetter ? 0 : Constants.Sizes.bottomPadding)
+
+                VStack(spacing: Constants.Sizes.spacingBetweenViews) {
                     if viewModel.stateView == .sendingLetter {
-                        Text(
-                            "На адрес superpochta@mail.ru отправлено письмо с" +
-                            " ссылкой для восстановления пароля. Пожалуйста, проверьте папку спам."
-                        )
+                        Text(Constants.Texts.emailSentMessage)
                     } else {
                         inputTextViews
                     }
                     Spacer()
                     ConfirmButton(configuration: viewModel.confirmButtonConfiguration)
                 }
-            }.padding(.leading, 16)
-                .padding(.trailing, 16)
-        }.onAppear {
+            }
+            .padding(.horizontal, Constants.Sizes.horizontalPadding)
+        }
+        .onAppear {
             viewModel.injectRouter(router)
             viewModel.startCheckingAnswerEmail()
-        }.onDisappear {
+        }
+        .onDisappear {
             viewModel.endCheckingAnswerEmail()
-        }.navigationDestination(for: Route.self) { route in
+        }
+        .navigationDestination(for: Route.self) { route in
             let destinationView: PasswordRecoveryView? = {
                 switch route {
                 case .passwordRecoverySendingLetter:
@@ -77,18 +86,16 @@ struct PasswordRecoveryView: View {
             }()
             destinationView
         }
-
     }
 
     var inputTextViews: some View {
-        VStack(spacing: 24) {
+        VStack(spacing: Constants.Layouts.inputViewsSpacing) {
             ForEach(viewModel.getContainers(), id: \.id) { id, container in
                 InputTextView(text: viewModel.binding(for: id), configuration: container.configuration)
             }
             Spacer()
-        }.padding(.leading, 16)
-            .padding(.trailing, 16)
-
+        }
+        .padding(.horizontal, Constants.Sizes.horizontalPadding)
     }
 }
 
