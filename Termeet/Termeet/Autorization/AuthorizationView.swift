@@ -2,18 +2,25 @@ import SwiftUI
 
 private struct Constants {
     static let appName = "Termeet"
-    static let titleText = "Регистрация"
-    static let subTitleText = "Почта"
-    static let placeholderText = "Введите почту"
+    static let registrationText = "Регистрация"
+    static let loginText = "Вход"
+    static let mailText = "Почта"
+    static let passwordText = "Пароль"
+    static let mailPlaceholderText = "Введите почту"
+    static let passwordPlaceholderText = "Введите пароль"
     static let infoText = "Для регистрации потребуется подтверждение почты"
-    static let footerText = "Уже есть аккаунт?"
+    static let haveAccountText = "Уже есть аккаунт?"
+    static let noAccountText = "Еще нет аккаунта?"
     static let confirmButtonText = "Подтвердить почту"
+    static let loginButtonText = "Войти"
+    static let forgetPasswordText = "Забыли пароль?"
     static let choiseText = "или"
     static let yandexImageName = "y.circle.fill"
     static let googleImageName = "g.circle.fill"
+    static let showPasswordImageName = "eye"
+    static let hidePasswordImageName = "eye.slash"
     static let yandexContinueText = "Продолжить с помощью Яндекс"
     static let googleContinueText = "Продолжить с помощью Google"
-    
     static let registerStackSpacing: CGFloat = 24
     static let bodyStackSpacing: CGFloat = 12
     static let buttonStackSpacing: CGFloat = 10
@@ -23,7 +30,18 @@ private struct Constants {
     static let bottomPadding: CGFloat = 20
 }
 
-struct RegistrationView: View {
+//TODO: Move out logic to ViewModel
+enum AuthorizationType {
+    case registration
+    case login
+}
+
+struct AuthorizationView: View {
+    
+    let viewType: AuthorizationType
+    @State private var password: String = ""
+    @State private var isShowingPassword: Bool = false
+    
     var body: some View {
         VStack {
             VStack(spacing: Constants.registerStackSpacing) {
@@ -31,26 +49,66 @@ struct RegistrationView: View {
                 Text(Constants.appName)
                     .font(.headline)
 
-                Text(Constants.titleText)
+                Text( viewType == .registration
+                      ? Constants.registrationText
+                      : Constants.loginText)
                     .font(.largeTitle)
                     .fontWeight(.bold)
                     .frame(maxWidth: .infinity, maxHeight: Constants.buttonHeight, alignment: .leading)
                     .padding(.horizontal)
 
                 VStack(alignment: .leading, spacing: Constants.bodyStackSpacing) {
-                    Text(Constants.subTitleText)
+                    Text(Constants.mailText)
                         .font(.subheadline)
                         .foregroundColor(.black)
-                    TextField(Constants.placeholderText, text: .constant(""))
+                    TextField(Constants.mailPlaceholderText, text: .constant(""))
                         .padding()
                         .frame(maxHeight: Constants.buttonHeight)
-                        .overlay(RoundedRectangle(cornerRadius: Constants.cornerRadius).stroke(Color.gray, lineWidth: Constants.borederWidth))
-
-
-                        
-                    Text(Constants.infoText)
-                        .font(.footnote)
-                        .foregroundColor(.gray)
+                        .overlay(RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                            .stroke(Color.gray, lineWidth: Constants.borederWidth))
+      
+                    if viewType == .registration {
+                        Text(Constants.infoText)
+                            .font(.footnote)
+                            .foregroundColor(.gray)
+                    } else {
+                        VStack(alignment: .leading, spacing: Constants.bodyStackSpacing) {
+                            Text(Constants.passwordText)
+                                .font(.subheadline)
+                                .foregroundColor(.black)
+                            HStack {
+                                if isShowingPassword {
+                                    TextField(Constants.passwordPlaceholderText, text: $password)
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                } else {
+                                    SecureField(Constants.passwordPlaceholderText, text: $password)
+                                        .autocapitalization(.none)
+                                        .disableAutocorrection(true)
+                                }
+                                Button {isShowingPassword.toggle()}
+                                label: {
+                                    Image(systemName: isShowingPassword
+                                          ? Constants.hidePasswordImageName
+                                          : Constants.showPasswordImageName)
+                                        .foregroundStyle(.gray)
+                                }
+                            }
+                                .padding()
+                                .frame(maxHeight: Constants.buttonHeight)
+                                .overlay(RoundedRectangle(cornerRadius: Constants.cornerRadius)
+                                    .stroke(Color.gray, lineWidth: Constants.borederWidth))
+                            HStack {
+                                Spacer()
+                                Button {
+                                    
+                                } label : {
+                                    Text(Constants.forgetPasswordText)
+                                }
+                            }
+                        }
+                        .padding(.top)
+                    }
                 }
                 .padding(.horizontal)
             }
@@ -61,7 +119,9 @@ struct RegistrationView: View {
 
                 Button {}
                 label: {
-                    Text(Constants.confirmButtonText)
+                    Text(viewType == .registration
+                         ? Constants.confirmButtonText
+                         : Constants.loginButtonText)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
@@ -72,23 +132,27 @@ struct RegistrationView: View {
                 .padding(.horizontal)
                 Button {}
                 label: {
-                    Text(Constants.footerText)
-                        .font(.footnote)
+                    Text(viewType == .registration
+                         ? Constants.haveAccountText
+                         : Constants.noAccountText)
+                        .font(.subheadline)
                         .foregroundColor(.blue)
                 }
+                .padding()
 
                 HStack {
                     VStack {
                         Divider()
                     }
                     Text(Constants.choiseText)
-                        .font(.footnote)
+                        .font(.subheadline)
                         .foregroundColor(.gray)
                     VStack {
                         Divider()
                     }
                 }
                 .padding(.horizontal)
+                .padding()
 
                 VStack(spacing: Constants.buttonStackSpacing) {
                     Button {}
@@ -132,6 +196,6 @@ struct RegistrationView: View {
 
 struct RegistrationView_Previews: PreviewProvider {
     static var previews: some View {
-        RegistrationView()
+        AuthorizationView(viewType: .login)
     }
 }
