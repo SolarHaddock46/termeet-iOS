@@ -1,32 +1,54 @@
 import SwiftUI
 
+private struct Constants {
+    static let appName = "Termeet"
+    static let titleText = "Регистрация"
+    static let subTitleText = "Почта"
+    static let placeholderText = "Введите почту"
+    static let infoText = "Для регистрации потребуется подтверждение почты"
+    static let footerText = "Уже есть аккаунт?"
+    static let confirmButtonText = "Подтвердить почту"
+    static let choiseText = "или"
+    static let yandexImageName = "y.circle.fill"
+    static let googleImageName = "g.circle.fill"
+    static let yandexContinueText = "Продолжить с помощью Яндекс"
+    static let googleContinueText = "Продолжить с помощью Google"
+    
+    static let registerStackSpacing: CGFloat = 24
+    static let bodyStackSpacing: CGFloat = 12
+    static let buttonStackSpacing: CGFloat = 10
+    static let buttonHeight: CGFloat = 43
+    static let cornerRadius: CGFloat = 10
+    static let borederWidth: CGFloat = 1
+    static let bottomPadding: CGFloat = 20
+}
+
 struct RegistrationView: View {
     var body: some View {
         VStack {
-            VStack(spacing: 24) {
+            VStack(spacing: Constants.registerStackSpacing) {
 
-                Text("Termeet")
+                Text(Constants.appName)
                     .font(.headline)
-                    .padding(.top, 16)
 
-                Text("Регистрация")
+                Text(Constants.titleText)
                     .font(.largeTitle)
                     .fontWeight(.bold)
-                    .frame(maxWidth: .infinity, maxHeight: 43, alignment: .leading)
+                    .frame(maxWidth: .infinity, maxHeight: Constants.buttonHeight, alignment: .leading)
                     .padding(.horizontal)
 
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Почта")
+                VStack(alignment: .leading, spacing: Constants.bodyStackSpacing) {
+                    Text(Constants.subTitleText)
                         .font(.subheadline)
                         .foregroundColor(.black)
-                    TextField("Введите почту", text: .constant(""))
+                    TextField(Constants.placeholderText, text: .constant(""))
                         .padding()
-                        .frame(maxHeight: 44)
-                        .overlay(RoundedRectangle(cornerRadius: 10).stroke(Color.gray, lineWidth: 1))
-                        
+                        .frame(maxHeight: Constants.buttonHeight)
+                        .overlay(RoundedRectangle(cornerRadius: Constants.cornerRadius).stroke(Color.gray, lineWidth: Constants.borederWidth))
+
 
                         
-                    Text("Для регистрации потребуется подтверждение почты")
+                    Text(Constants.infoText)
                         .font(.footnote)
                         .foregroundColor(.gray)
                 }
@@ -35,22 +57,22 @@ struct RegistrationView: View {
 
             Spacer()
 
-            VStack(spacing: 12) {
+            VStack(spacing: Constants.bodyStackSpacing) {
 
                 Button {}
                 label: {
-                    Text("Подтвердить почту")
+                    Text(Constants.confirmButtonText)
                         .foregroundColor(.white)
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .frame(maxHeight: 43)
+                        .frame(maxHeight: Constants.buttonHeight)
                         .background(Color.gray)
-                        .cornerRadius(12)
+                        .cornerRadius(Constants.cornerRadius)
                 }
                 .padding(.horizontal)
                 Button {}
                 label: {
-                    Text("Уже есть аккаунт?")
+                    Text(Constants.footerText)
                         .font(.footnote)
                         .foregroundColor(.blue)
                 }
@@ -59,7 +81,7 @@ struct RegistrationView: View {
                     VStack {
                         Divider()
                     }
-                    Text("или")
+                    Text(Constants.choiseText)
                         .font(.footnote)
                         .foregroundColor(.gray)
                     VStack {
@@ -67,42 +89,42 @@ struct RegistrationView: View {
                     }
                 }
                 .padding(.horizontal)
-                
-                VStack(spacing: 10) {
+
+                VStack(spacing: Constants.buttonStackSpacing) {
                     Button {}
                     label: {
                         HStack {
-                            Image(systemName: "y.circle.fill") // Можете заменить кастомной иконкой
+                            Image(systemName: Constants.yandexImageName)
                                 .foregroundColor(.red)
-                            Text("Продолжить с помощью Яндекс")
+                            Text(Constants.yandexContinueText)
                                 .foregroundColor(.white)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .frame(height: 43)
+                        .frame(height: Constants.buttonHeight)
                         .background(Color.black)
-                        .cornerRadius(12)
+                        .cornerRadius(Constants.cornerRadius)
                     }
                     .padding(.horizontal)
 
                     Button {}
                     label: {
                         HStack {
-                            Image(systemName: "g.circle.fill")
+                            Image(systemName: Constants.googleImageName)
                                 .foregroundColor(.green)
-                            Text("Продолжить с помощью Google")
+                            Text(Constants.googleContinueText)
                                 .foregroundColor(.white)
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .frame(height: 43)
+                        .frame(height: Constants.buttonHeight)
                         .background(Color.black)
-                        .cornerRadius(12)
+                        .cornerRadius(Constants.cornerRadius)
                     }
                     .padding(.horizontal)
                 }
-                .padding(.top, 40)
-            }.frame(maxHeight: 320)
+            }
+            .padding(.bottom, Constants.bottomPadding)
         }
         .frame(maxHeight: .infinity)
     }
