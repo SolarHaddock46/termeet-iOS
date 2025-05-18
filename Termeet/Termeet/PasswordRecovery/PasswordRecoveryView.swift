@@ -17,7 +17,7 @@ private enum Constants {
     }
 
     enum Layouts {
-
+        
     }
 
     enum Texts {
@@ -26,65 +26,69 @@ private enum Constants {
 }
 
 struct PasswordRecoveryView: View {
+    @StateObject var viewModel: PasswordRecoveryViewModel
     @EnvironmentObject var router: Router
-    @StateObject var viewModel = PasswordRecoveryViewModel()
 
-    init(viewModel: PasswordRecoveryViewModel = .init()) {
-        _viewModel = StateObject(wrappedValue: viewModel)
+    init(viewModel: PasswordRecoveryViewModel? = nil) {
+        if let viewModel {
+            _viewModel = StateObject(wrappedValue: viewModel)
+        } else {
+            _viewModel = StateObject(wrappedValue: .init())
+        }
     }
 
     var body: some View {
-        inputTextViews
-    }
-
-    var inputTextViews: some View {
-        VStack(spacing: 24) {
-            HStack {
-                Text("Восстановление пароля")
-                    .font(.system(size: 30, weight: .bold))
-                Spacer()
-            }
-
-            ForEach(viewModel.getContainers(), id: \.id) { id, container in
-                InputTextView(text: viewModel.binding(for: id), configuration: container.configuration)
-            }
-            Spacer()
-            ConfirmButton(configuration: viewModel.confirmButtonConfiguration)
-        }.padding(.leading, 16)
-            .padding(.trailing, 16)
-        .navigationDestination(for: Route.self) { route in
+        Group {
+            VStack {
+                HStack {
+                    Text("Восстановление пароля")
+                        .font(.system(size: 30, weight: .bold))
+                    Spacer()
+                }.padding(.bottom, viewModel.stateView == .sendingLetter ? 0 : 48)
+                VStack(spacing: 20) {
+                    if viewModel.stateView == .sendingLetter {
+                        Text(
+                            "На адрес superpochta@mail.ru отправлено письмо с" +
+                            " ссылкой для восстановления пароля. Пожалуйста, проверьте папку спам."
+                        )
+                    } else {
+                        inputTextViews
+                    }
+                    Spacer()
+                    ConfirmButton(configuration: viewModel.confirmButtonConfiguration)
+                }
+            }.padding(.leading, 16)
+                .padding(.trailing, 16)
+        }.onAppear {
+            viewModel.injectRouter(router)
+            viewModel.startCheckingAnswerEmail()
+        }.onDisappear {
+            viewModel.endCheckingAnswerEmail()
+        }.navigationDestination(for: Route.self) { route in
             let destinationView: PasswordRecoveryView? = {
                 switch route {
                 case .passwordRecoverySendingLetter:
-                    let childVM = PasswordRecoveryViewModel(
-                        copying: self.viewModel,
-                        state: .sendingLetter
-                    )
-                    return PasswordRecoveryView(viewModel: childVM)
+                    return PasswordRecoveryView(viewModel: .init(router: router, stateView: .sendingLetter))
                 case .passwordRecoveryInputNewPassword:
-                    let childVM = PasswordRecoveryViewModel(
-                        copying: self.viewModel,
-                        state: .inputNewPassword
-                    )
-                    return PasswordRecoveryView(viewModel: childVM)
+                    return PasswordRecoveryView(viewModel: .init(router: router, stateView: .inputNewPassword))
                 default:
                     return nil
                 }
             }()
-            Group {
-                destinationView
-            }
-            .onDisappear {
-                switch route {
-                case .passwordRecoverySendingLetter:
-                    viewModel.setState(.inputEmail)
-                case .passwordRecoveryInputNewPassword:
-                    viewModel.setState(.sendingLetter)
-                default:
-                    break
-                }
-            }
+            destinationView
         }
+
+    }
+
+    var inputTextViews: some View {
+        VStack(spacing: 24) {
+            ForEach(viewModel.getContainers(), id: \.id) { id, container in
+                InputTextView(text: viewModel.binding(for: id), configuration: container.configuration)
+            }
+            Spacer()
+        }.padding(.leading, 16)
+            .padding(.trailing, 16)
+
     }
 }
 

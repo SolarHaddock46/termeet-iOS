@@ -110,7 +110,6 @@ private extension ConfirmButton {
                     .font(configuration.headerFont)
                     .foregroundStyle(configuration.headerColor)
             }
-            Spacer()
         }
     }
 }

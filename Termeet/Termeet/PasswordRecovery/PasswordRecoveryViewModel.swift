@@ -28,13 +28,17 @@ private enum ContainerUUIDs {
 }
 
 final class PasswordRecoveryViewModel: ObservableObject {
-    @Published private(set) var stateView: StateView = .inputEmail
+    let stateView: StateView
+    private var router: Router?
+    private var tempTimer: Timer?
+    private var repeatSendEmailTimer: Timer?
 
-    convenience init(copying other: PasswordRecoveryViewModel, state: StateView) {
-        self.init()
-        self.containers = other.containers
-        self.stateView = state
-      }
+    init(router: Router? = nil, stateView: StateView = .inputEmail) {
+        self.stateView = stateView
+        self.router = router
+        initContainers()
+        initConfirmButton()
+    }
 
     private let logger = Logger(
         subsystem: Bundle.main.bundleIdentifier ?? "Unknown",
@@ -44,24 +48,13 @@ final class PasswordRecoveryViewModel: ObservableObject {
     @Published private(set) var containers = [UUID: Container]()
     @Published private(set) var confirmButtonConfiguration = ConfirmButtonConfiguration(title: "Test")
 
-    init() {
-        initContainers()
-        initConfirmButton()
+    func injectRouter(_ router: Router, isReplacing: Bool = false) {
+        if self.router != nil && !isReplacing {
+            return
+        }
+        self.router = router
     }
 
-    private func checkEmail(_ email: String) {
-        if email == "123" {
-            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
-                $0.isErrored = true
-                $0.footerText = "Почта некорректна"
-            }
-        } else {
-            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
-                $0.isErrored = false
-                $0.footerText = "На эту почту будет отправлено письмо с восстановлением"
-            }
-        }
-    }
 }
 
 extension PasswordRecoveryViewModel {
@@ -112,59 +105,195 @@ extension PasswordRecoveryViewModel {
     }
 
     private func initContainers() {
-        containers[ContainerUUIDs.InputEmail.email] = .init(
-            configuration: .init(
-                placeholder: "Введите почту",
-                headerText: "Почта",
-                footerText: "На эту почту будет отправлено письмо с восстановлением",
-                isSecured: true,
-                onTextChange: {
-                    self.checkEmail($0)
-                },
+        switch stateView {
+        case .inputEmail:
+            containers[ContainerUUIDs.InputEmail.email] = .init(
+                configuration: .init(
+                    placeholder: "Введите почту",
+                    headerText: "Почта",
+                    footerText: "На эту почту будет отправлено письмо с восстановлением",
+                    isSecured: true,
+                    onTextChange: {
+                        self.checkEmail($0)
+                        self.checkFillForms()
+                    },
+                )
             )
-        )
-        containers[ContainerUUIDs.InputNewPassword.password] = .init(configuration: .init())
-        containers[ContainerUUIDs.InputNewPassword.repeatPassword] = .init(configuration: .init())
+        case .inputNewPassword:
+            containers[ContainerUUIDs.InputNewPassword.password] = .init(
+                configuration: .init(
+                    placeholder: "Введите пароль",
+                    headerText: "Новый пароль",
+                    footerText: "Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв",
+                    isSecured: true,
+                    onEndEditing: { self.checkPassword() },
+                    onTextChange: { _ in
+                        self.checkFillForms()
+                    }
+                )
+            )
+            containers[ContainerUUIDs.InputNewPassword.repeatPassword] = .init(
+                configuration: .init(
+                    placeholder: "Введите пароль",
+                    headerText: "Пароль повторно",
+                    isSecured: true,
+                    onEndEditing: { self.checkPassword() },
+                    onTextChange: { _ in
+                        self.checkFillForms()
+                    }
+                )
+            )
+        default:
+            break
+        }
     }
 }
 
 extension PasswordRecoveryViewModel {
     private func initConfirmButton() {
+        switch stateView {
+        case .inputEmail:
+            confirmButtonConfiguration.update {
+                $0.title = "Отправить письмо на почту"
+                $0.isEnabled = false
+                $0.footerTextButton = "Вернуться ко входу"
+                $0.action = { self.router?.path.append(Route.passwordRecoverySendingLetter) }
+                $0.footerTextActionButton = { self.router?.popToRoot() }
+            }
+        case .sendingLetter:
+            confirmButtonConfiguration.update {
+                $0.title = "Отправить повторно"
+                $0.isEnabled = false
+                $0.footerTextButton = "Вернуться ко входу"
+                $0.action = { self.router?.path.append(Route.passwordRecoveryInputNewPassword) }
+                $0.footerTextActionButton = { self.router?.popToRoot() }
+            }
+        case .inputNewPassword:
+            confirmButtonConfiguration.update {
+                $0.title = "Восстановить"
+                $0.isEnabled = false
+                $0.footerTextButton = "Вернуться ко входу"
+                $0.footerTextActionButton = { self.router?.popToRoot() }
+            }
+        }
+    }
+}
+
+private extension PasswordRecoveryViewModel {
+    func checkEmail(_ email: String) {
+        if email == "123" {
+            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
+                $0.isErrored = true
+                $0.footerText = "Почта некорректна"
+            }
+        } else {
+            containers[ContainerUUIDs.InputEmail.email]?.configuration.update {
+                $0.isErrored = false
+                $0.footerText = "На эту почту будет отправлено письмо с восстановлением"
+            }
+        }
+    }
+
+    func checkFillForms() {
+        if containers.isEmpty {
+            return
+        }
+        let isAllTextFill = containers.values.allSatisfy({ !$0.text.isEmpty })
         confirmButtonConfiguration.update {
-            $0.title = "Отправить письмо на почту"
+            $0.isEnabled = isAllTextFill
+        }
+    }
+
+    func checkPassword() {
+        guard
+            var containerPassword = containers[ContainerUUIDs.InputNewPassword.password],
+            var containerRepeatPassword = containers[ContainerUUIDs.InputNewPassword.repeatPassword]
+        else {
+            return
+        }
+
+        if containerPassword.text == "123" {
+            containerPassword.configuration.update {
+                $0.isErrored = true
+                $0.footerText = "Некорректный пароль. Пароль должен содержать не" +
+                " менее 8 символов и состоять из цифр и латинских букв"
+            }
+            containers[ContainerUUIDs.InputNewPassword.password] = containerPassword
+            return
+        } else {
+            containerPassword.configuration.update {
+                $0.isErrored = false
+                $0.footerText = "Пароль должен содержать не менее 8 символов и состоять из цифр и латинских букв"
+            }
+        }
+        if containerPassword.text != containerRepeatPassword.text {
+            containerRepeatPassword.configuration.update {
+                $0.isErrored = true
+                $0.footerText = "Пароли не совпадают"
+            }
+        } else {
+            containerRepeatPassword.configuration.update {
+                $0.isErrored = false
+                $0.footerText = nil
+            }
+        }
+
+        containers[ContainerUUIDs.InputNewPassword.password] = containerPassword
+        containers[ContainerUUIDs.InputNewPassword.repeatPassword] = containerRepeatPassword
+    }
+}
+
+extension PasswordRecoveryViewModel {
+    func startCheckingAnswerEmail() {
+        if stateView != .sendingLetter || tempTimer != nil {
+            return
+        }
+        tempTimer = .scheduledTimer(withTimeInterval: 5, repeats: false, block: { [weak self] timer in
+            guard let self else {
+                return
+            }
+            self.router?.path.append(Route.passwordRecoveryInputNewPassword)
+            timer.invalidate()
+            self.tempTimer = nil
+        })
+        var counter = 0
+        self.confirmButtonConfiguration.update {
+            $0.headerText = "Вы можете запросить повторно через 3:00"
             $0.isEnabled = false
-            $0.footerTextButton = "Вернуться ко входу"
+        }
 
+        repeatSendEmailTimer = .scheduledTimer(withTimeInterval: 1, repeats: true) { [weak self] timer in
+            guard let self = self else {
+                return
+            }
+            if counter >= 180 {
+                timer.invalidate()
+                self.repeatSendEmailTimer = nil
+                self.confirmButtonConfiguration.update {
+                    $0.headerText = nil
+                    $0.isEnabled = true
+                }
+            } else {
+                let time = 180 - counter
+                let minutes = time / 60
+                let seconds = time % 60
+                let secondsString = String(format: "%02d", seconds)
+                self.confirmButtonConfiguration.update {
+                    $0.headerText = "Вы можете запросить повторно через \(minutes):\(secondsString)"
+                    $0.isEnabled = false
+                }
+                counter += 1
+            }
         }
     }
-}
 
-extension PasswordRecoveryViewModel {
-    func setState(_ state: StateView) {
-        self.stateView = state
-    }
-}
-
-extension PasswordRecoveryViewModel {
-    func nextState() {
-        switch stateView {
-        case .inputEmail:
-            stateView = .sendingLetter
-        case .sendingLetter:
-            stateView = .inputNewPassword
-        case .inputNewPassword:
-            break
+    func endCheckingAnswerEmail() {
+        if stateView != .sendingLetter {
+            return
         }
-    }
-
-    func previousState() {
-        switch stateView {
-        case .inputNewPassword:
-            stateView = .sendingLetter
-        case .sendingLetter:
-            stateView = .inputEmail
-        case .inputEmail:
-            break
-        }
+        tempTimer?.invalidate()
+        tempTimer = nil
+        repeatSendEmailTimer?.invalidate()
+        repeatSendEmailTimer = nil
     }
 }

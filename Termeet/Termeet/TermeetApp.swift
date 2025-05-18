@@ -9,10 +9,13 @@ import SwiftUI
 
 @main
 struct TermeetApp: App {
+    @StateObject var router = Router()
 
     var body: some Scene {
         WindowGroup {
-            RootView()
+            NavigationStack(path: $router.path) {
+                PasswordRecoveryView()
+            }.environmentObject(router)
         }
     }
 }
