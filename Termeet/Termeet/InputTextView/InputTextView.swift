@@ -182,79 +182,22 @@ private extension InputTextView {
 
 // MARK: - Modifiers
 extension InputTextView {
-    func setConfiguration(_ value: InputTextConfiguration) -> Self {
-        var view = self
-        view.configuration = value
-        return view
-    }
-
     func updateConfiguration(_ update: (inout InputTextConfiguration) -> Void) -> Self {
         var view = self
         view.configuration.update(update)
         return view
-    }
-
-    func setPlaceholder(_ value: String?) -> Self {
-        updateConfiguration { $0.placeholder = value }
-    }
-
-    func setHeader(text: String?, font: Font? = nil, color: Color? = nil) -> Self {
-        updateConfiguration {
-            $0.headerText = text
-            if let font { $0.headerFont = font }
-            if let color { $0.headerColor = color }
-        }
-    }
-
-    func setFooter(text: String?, font: Font? = nil, color: Color? = nil) -> Self {
-        updateConfiguration {
-            $0.footerText = text
-            if let font { $0.footerFont = font }
-            if let color { $0.footerColor = color }
-        }
-    }
-
-    func setErrorState(_ value: Bool) -> Self {
-        updateConfiguration { $0.isErrored = value }
-    }
-
-    func setSecureInput(_ value: Bool) -> Self {
-        updateConfiguration { $0.isSecured = value }
-    }
-
-    func setBoardColor(_ value: Color) -> Self {
-        updateConfiguration { $0.boardColor = value }
-    }
-
-    func setAuxiliaryButton(text: String? = nil, action: (() -> Void)? = nil) -> Self {
-        updateConfiguration {
-            $0.auxiliaryButtonText = text
-            $0.auxiliaryButtonAction = action
-        }
-    }
-
-    func setOnBeginEditing(_ action: (() -> Void)? = nil) -> Self {
-        updateConfiguration { $0.onBeginEditing = action }
-    }
-
-    func setOnEndEditing(_ action: (() -> Void)? = nil ) -> Self {
-        updateConfiguration { $0.onEndEditing = action }
-    }
-
-    func setOnTextChange(_ action: ((String) -> Void)? = nil) -> Self {
-        updateConfiguration { $0.onTextChange = action }
     }
 }
 
 struct InputTextView_Previews: PreviewProvider {
     static var previews: some View {
         InputTextView(text: .constant(""))
-            .setHeader(text: "Пароль")
-            .setFooter(text: "Минимум 8 символов")
-            .setPlaceholder("Введите пароль")
-            .setSecureInput(true)
-            .setAuxiliaryButton(text: "Забыли пароль?") {
-                print("Кнопка нажата")
+            .updateConfiguration { config in
+                config.isErrored = true
+                config.footerText = "This is a footer"
+                config.errorColor = .red
+                config.headerText = "This is a header"
+                config.placeholder = "Placeholder"
             }
     }
 }

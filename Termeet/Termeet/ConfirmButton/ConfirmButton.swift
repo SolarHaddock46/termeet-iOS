@@ -55,7 +55,7 @@ struct ConfirmButtonConfiguration {
 struct ConfirmButton: View {
     private var configuration: ConfirmButtonConfiguration
 
-    init(configuration: ConfirmButtonConfiguration = .init(title: "Test")) {
+    init(configuration: ConfirmButtonConfiguration = .init(title: "")) {
         self.configuration = configuration
     }
 
@@ -122,47 +122,16 @@ extension ConfirmButton {
         view.configuration.update(changes)
         return view
     }
-
-    func setTitle(text: String?, font: Font? = nil, color: Color?) -> Self {
-        updateConfiguration {
-            if let text { $0.title = text }
-            if let font { $0.titleFont = font }
-            if let color { $0.titleColor = color }
-        }
-    }
-
-    func setAction(_ action: @escaping () -> Void) -> Self {
-        updateConfiguration { $0.action = action }
-    }
-
-    func setEnabled(_ isEnabled: Bool) -> Self {
-        updateConfiguration { $0.isEnabled = isEnabled }
-    }
-
-    func setHeader(text: String?, color: Color? = nil, font: Font? = nil) -> Self {
-        updateConfiguration {
-            $0.headerText = text
-            if let color { $0.headerColor = color }
-            if let font { $0.headerFont = font }
-        }
-    }
-
-    func setBackgroundColor(_ color: Color) -> Self {
-        updateConfiguration { $0.backgroundColor = color }
-    }
-
-    func setFooter(text: String?, color: Color? = nil, font: Font? = nil, action: (() -> Void)? = nil) -> Self {
-        updateConfiguration {
-            $0.footerTextButton = text
-            if let color { $0.footerTextColor = color }
-            if let font { $0.footerTextFont = font }
-            if let action { $0.footerTextActionButton = action }
-        }
-    }
 }
 
 struct ConfirmButton_Previews: PreviewProvider {
     static var previews: some View {
-        ConfirmButton(configuration: .init(title: "test", headerText: "123", footerTextButton: "123"))
+        ConfirmButton(
+            configuration: .init(
+                title: "Confirm Password",
+                headerText: "Enter your password",
+                footerTextButton: "Forgot Password?"
+            )
+        )
     }
 }
