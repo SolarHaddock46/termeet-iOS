@@ -5,11 +5,13 @@ enum Route: Hashable, Identifiable {
     case detail
     case settings
 
+    // MARK: - for passwordRecoveryView
+    case passwordRecoveryInputEmail
+    case passwordRecoverySendingLetter
+    case passwordRecoveryInputNewPassword
+
     var id: String {
-        switch self {
-        case .detail: return "detail"
-        case .settings: return "settings"
-        }
+        String(describing: self)
     }
 }
 
