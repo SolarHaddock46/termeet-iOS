@@ -36,7 +36,7 @@ private enum Constants {
     }
 }
 
-struct InputTextConfiguration {
+struct InputTextConfiguration: SelfUpdatable {
     var placeholder: String?
     var headerText: String?
     var footerText: String?
@@ -56,11 +56,6 @@ struct InputTextConfiguration {
     var onEndEditing: (() -> Void)?
     var onTextChange: ((String) -> Void)?
     var auxiliaryButtonAction: (() -> Void)?
-
-    mutating func update(_ changes: (inout Self) -> Void) {
-        changes(&self)
-    }
-
 }
 
 struct InputTextView: View {
@@ -189,15 +184,17 @@ extension InputTextView {
     }
 }
 
-struct InputTextView_Previews: PreviewProvider {
-    static var previews: some View {
-        InputTextView(text: .constant(""))
-            .updateConfiguration { config in
-                config.isErrored = true
-                config.footerText = "This is a footer"
-                config.errorColor = .red
-                config.headerText = "This is a header"
-                config.placeholder = "Placeholder"
-            }
-    }
+#if DEBUG
+
+#Preview {
+    InputTextView(text: .constant(""))
+        .updateConfiguration {
+            $0.headerText = "Header"
+            $0.footerText = "Footer"
+            $0.placeholder = "Placeholder"
+            $0.auxiliaryButtonText = "Auxiliary Button"
+        }
+        .padding(.horizontal, 16)
 }
+
+#endif

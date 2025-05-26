@@ -28,7 +28,7 @@ private enum Constants {
     }
 }
 
-struct ConfirmButtonConfiguration {
+struct ConfirmButtonConfiguration: SelfUpdatable {
     var title: String
     var titleFont: Font = Constants.Fonts.titleText
     var titleColor: Color = Constants.Colors.titleText
@@ -46,10 +46,6 @@ struct ConfirmButtonConfiguration {
     var footerTextFont: Font = Constants.Fonts.footerText
     var footerTextColor: Color = Constants.Colors.footerText
     var footerTextActionButton: (() -> Void)?
-
-    mutating func update(_ changes: (inout ConfirmButtonConfiguration) -> Void) {
-        changes(&self)
-    }
 }
 
 struct ConfirmButton: View {
@@ -124,14 +120,15 @@ extension ConfirmButton {
     }
 }
 
-struct ConfirmButton_Previews: PreviewProvider {
-    static var previews: some View {
-        ConfirmButton(
-            configuration: .init(
-                title: "Confirm Password",
-                headerText: "Enter your password",
-                footerTextButton: "Forgot Password?"
-            )
-        )
-    }
+#if DEBUG
+
+#Preview {
+    ConfirmButton(title: "title")
+        .updateConfiguration {
+            $0.footerTextButton = "Footer Button"
+            $0.headerText = "Header Text"
+        }
+        .padding(.horizontal, 16)
 }
+
+#endif
